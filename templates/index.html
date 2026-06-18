@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SciWrite AI</title>
+    <style>
+        @import url('[https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap)');
+        
+        *, *::before, *::after { box-sizing: border-box; }
+        body { margin: 0; padding: 0; background-color: #f8f9fa; font-family: 'Inter', sans-serif; color: #1e2438; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Sidebar layout */
+        .sidebar { width: 320px; background-color: #ffffff; border-right: 1px solid #eaedf3; padding: 0; overflow-y: auto; flex-shrink: 0; }
+        .main-content { flex-grow: 1; overflow-y: auto; padding: 40px; background-color: #f8f9fa; }
+        
+        .sci-logo { display: flex; align-items: center; gap: 10px; padding: 22px 20px 16px; border-bottom: 1px solid #eaedf3; margin-bottom: 18px; }
+        .sci-logo-icon { width: 34px; height: 34px; background: linear-gradient(135deg, #0d6efd, #6f42c1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: white; }
+        .sci-logo-text { font-size: 1.1rem; font-weight: 700; color: #1e2438; letter-spacing: -0.01em; }
+        .sci-logo-badge { font-size: 0.58rem; font-weight: 600; background: linear-gradient(90deg, #0d6efd, #6f42c1); color: #fff; padding: 2px 7px; border-radius: 20px; letter-spacing: 0.08em; text-transform: uppercase; }
+        
+        .sb-label { font-size: 0.67rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #5a6380; padding: 14px 20px 5px; }
+        .sidebar-section { padding: 10px 20px; }
+        
+        /* Inputs & Controls */
+        label { display: block; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #4f5878; margin-bottom: 6px; }
+        input[type="text"], input[type="number"], select, textarea { width: 100%; background: #ffffff; border: 1px solid #d1d5db; border-radius: 8px; color: #1e2438; font-size: 0.87rem; padding: 10px; font-family: inherit; transition: border-color 0.15s; margin-bottom: 15px; }
+        input[type="text"]:focus, textarea:focus, select:focus { border-color: #0d6efd; outline: none; box-shadow: 0 0 0 3px rgba(13,110,253,0.1); }
+        
+        .radio-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+        .radio-group label { text-transform: none; font-weight: 500; font-size: 0.85rem; letter-spacing: normal; color: #1e2438; display: flex; align-items: center; gap: 8px; }
+        
+        input[type="range"] { width: 100%; margin-bottom: 10px; }
+        .slider-val { font-size: 0.75rem; color: #5a6380; margin-top: -5px; margin-bottom: 15px; }
+        
+        /* Hero */
+        .hero-wrap { padding: 0 0 24px; border-bottom: 1px solid #eaedf3; margin-bottom: 28px; }
+        .hero-eyebrow { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #0d6efd; margin-bottom: 10px; }
+        .hero-h1 { font-family: 'Playfair Display', Georgia, serif; font-size: 2.6rem; font-weight: 700; line-height: 1.1; background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 50%, #d63384 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; margin-top:0;}
+        .hero-sub { font-size: 1rem; color: #5a6380; max-width: 620px; line-height: 1.6; }
+        .stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
+        .stat-pill { display: inline-flex; align-items: center; gap: 7px; background: #e0f0ff; border: 1px solid rgba(13,110,253,0.2); border-radius: 20px; padding: 5px 13px; font-size: 0.78rem; font-weight: 600; color: #0d6efd; }
+        
+        /* Tabs */
+        .tabs { display: flex; border-bottom: 1px solid #eaedf3; margin-bottom: 24px; }
+        .tab-btn { background: transparent; border: none; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #5a6380; padding: 12px 20px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .tab-btn:hover { color: #0d6efd; }
+        .tab-btn.active { color: #6f42c1; border-bottom: 2px solid #6f42c1; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* Sections */
+        .sec-header { display: flex; align-items: center; gap: 9px; margin-bottom: 18px; }
+        .sec-icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+        .sec-icon-blue { background: rgba(13,110,253,0.15); color: #0d6efd; }
+        .sec-icon-purple { background: rgba(111,66,193,0.15); color: #6f42c1;}
+        .sec-icon-green { background: rgba(25,135,84,0.15); color: #198754;}
+        .sec-icon-pink { background: rgba(214,51,132,0.15); color: #d63384;}
+        .sec-title { font-size: 1rem; font-weight: 600; color: #1e2438; }
+        .sec-sub { font-size: 0.78rem; color: #5a6380; margin-top: 1px; }
+        
+        /* Cards & Grids */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .card { background: #ffffff; border: 1px solid #eaedf3; border-radius: 12px; padding: 20px 22px; margin-bottom: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .card-sm { background: #ffffff; border: 1px solid #eaedf3; border-radius: 9px; padding: 14px 16px; margin-bottom: 12px; }
+        
+        /* Authors Table */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        th, td { text-align: left; padding: 8px; border-bottom: 1px solid #eaedf3; }
+        th { font-size: 0.75rem; text-transform: uppercase; color: #5a6380; font-weight: 600; }
+        .btn-sm { background: #e0f0ff; color: #0d6efd; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+        .btn-sm:hover { background: #cce4ff; }
+        .btn-delete { background: #fce8e8; color: #dc3545; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+        
+        /* Main Buttons */
+        .btn-primary { width: 100%; background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%); color: #fff; border: none; border-radius: 9px; padding: 0.8rem 1.8rem; font-size: 0.95rem; font-weight: 700; letter-spacing: 0.04em; cursor: pointer; transition: opacity 0.2s, transform 0.1s; box-shadow: 0 4px 15px rgba(111,66,193,0.25); }
+        .btn-primary:hover:not(:disabled) { opacity: 0.92; transform: translateY(-1px); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+        
+        /* Loading */
+        #loading-overlay { display: none; margin-top: 20px; padding: 20px; border-radius: 12px; background: rgba(13,110,253,0.05); border: 1px solid rgba(13,110,253,0.2); }
+        .loader { border: 3px solid rgba(13,110,253,0.2); border-top: 3px solid #0d6efd; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Results Section */
+        #results-container { display: none; margin-top: 30px; }
+        .gen-status-bar { display: flex; align-items: center; gap: 10px; background: rgba(25,135,84,0.08); border: 1px solid rgba(25,135,84,0.25); border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; }
+        .gen-status-dot { width: 8px; height: 8px; border-radius: 50%; background: #198754; box-shadow: 0 0 8px #198754; flex-shrink: 0; }
+        .gen-status-text { font-size: 0.85rem; font-weight: 600; color: #198754; }
+        .gen-status-meta { font-size: 0.8rem; color: #5a6380; margin-left: auto; }
+        
+        .dl-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+        .dl-card { background: #ffffff; border: 1px solid #eaedf3; border-radius: 12px; padding: 18px 20px; text-align: left; display:flex; flex-direction: column;}
+        .dl-card-title { font-size: 0.85rem; font-weight: 700; color: #1e2438; margin-bottom: 4px; }
+        .dl-card-meta { font-size: 0.75rem; color: #5a6380; margin-bottom: 14px; flex-grow:1;}
+        .btn-outline { display: inline-block; text-align: center; background: transparent; color: #0d6efd; border: 1px solid rgba(13,110,253,0.3); border-radius: 8px; padding: 8px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none;}
+        .btn-outline:hover { background: rgba(13,110,253,0.05); border-color: #0d6efd; }
+        .overleaf-cta { background: rgba(25,135,84,0.1); border-color: rgba(25,135,84,0.3); color: #198754; }
+        .overleaf-cta:hover { background: rgba(25,135,84,0.15); border-color: #198754; }
+        
+        .code-block { background: #1e2438; color: #c9d1e0; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.8rem; overflow-x: auto; max-height: 300px; white-space: pre-wrap; }
+        .collapsible { background-color: #ffffff; color: #1e2438; cursor: pointer; padding: 12px 15px; width: 100%; border: 1px solid #eaedf3; border-radius: 8px; text-align: left; outline: none; font-size: 0.85rem; font-weight: 600; margin-bottom: 10px; }
+        .collapsible:after { content: '\002B'; float: right; font-weight: bold; }
+        .active-collapsible:after { content: "\2212"; }
+        .collapsible-content { padding: 0 15px; max-height: 0; overflow: hidden; transition: max-height 0.2s ease-out; background-color: #fafbfc; border-left: 1px solid #eaedf3; border-right: 1px solid #eaedf3; border-radius: 0 0 8px 8px; margin-top: -10px; margin-bottom: 15px; }
+        
+    </style>
+</head>
+<body>
+    
+<div class="sidebar">
+    <div class="sci-logo">
+        <div class="sci-logo-icon">&#128300;</div>
+        <div><div class="sci-logo-text">SciWrite AI</div></div>
+        <div class="sci-logo-badge">v2.0</div>
+    </div>
+    
+    <div class="sidebar-section">
+        <div class="sb-label">Document Layout</div>
+        <div class="radio-group">
+            <label><input type="radio" name="layout_opt" value="Single Column" checked> Single Column</label>
+            <label><input type="radio" name="layout_opt" value="Double Column"> Double Column</label>
+        </div>
+        
+        <div class="sb-label">Paper Length</div>
+        <div class="radio-group" style="flex-direction: row; gap:15px; margin-bottom: 10px;">
+            <label><input type="radio" name="length_mode" value="Pages" checked> Pages</label>
+            <label><input type="radio" name="length_mode" value="Words"> Words</label>
+        </div>
+        
+        <div id="pages-slider-group">
+            <input type="range" id="target_pages" min="4" max="20" value="8" oninput="updateSliders()">
+            <div class="slider-val" id="pages-val">Target pages: 8</div>
+        </div>
+        
+        <div id="words-slider-group" style="display:none;">
+            <input type="range" id="target_words" min="1500" max="12000" step="500" value="5000" oninput="updateSliders()">
+            <div class="slider-val" id="words-val">Target words: 5000</div>
+        </div>
+        
+        <div class="sb-label">Target Venue</div>
+        <select id="venue">
+            <option>NeurIPS</option>
+            <option>ICML</option>
+            <option>ICLR</option>
+            <option>CVPR</option>
+            <option>ACL</option>
+            <option>Nature</option>
+            <option>Science</option>
+            <option>IEEE Transactions</option>
+            <option>AAAI</option>
+            <option>ECCV</option>
+            <option>EMNLP</option>
+            <option>Custom / Unspecified</option>
+        </select>
+        
+        <div class="sb-label">Upload Figures</div>
+        <input type="file" id="figures" multiple accept=".png,.jpg,.jpeg">
+        
+        <hr style="border: 0; border-top: 1px solid #eaedf3; margin: 20px 0;">
+        <div style="font-size:0.7rem;color:#5a6380;line-height:1.9;padding:0 4px;">
+            <b style="color:#1e2438;">Workflow</b><br>
+            1 &middot; Fill Metadata &amp; Context<br>
+            2 &middot; Set length in sidebar<br>
+            3 &middot; Generate Paper<br>
+            4 &middot; Download .tex + .pdf<br>
+            5 &middot; Or open in Overleaf
+        </div>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="hero-wrap">
+        <div class="hero-eyebrow">AI-Powered Academic Writing</div>
+        <h1 class="hero-h1">SciWrite AI</h1>
+        <div class="hero-sub">Transform research notes into full-length, publication-ready papers. Gemini writes every section &mdash; equations, citations, tables &mdash; then compiles to PDF.</div>
+        <div class="stat-row">
+            <div class="stat-pill">&#128300; Gemini 2.0 Flash</div>
+            <div class="stat-pill">&#128208; LaTeX + pdflatex</div>
+            <div class="stat-pill">&#128196; Up to 20 pages</div>
+            <div class="stat-pill">&#127963; 8 major venues</div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab(event, 'tab-meta')">&#128203; Metadata</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-ctx')">&#128300; Research Context</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-bib')">&#128218; Bibliography</button>
+        <button class="tab-btn" onclick="openTab(event, 'tab-gen')">&#128640; Generate & Export</button>
+    </div>
+
+    <form id="paper-form" onsubmit="event.preventDefault();">
+        <div id="tab-meta" class="tab-content active">
+            <div class="sec-header">
+                <div class="sec-icon sec-icon-blue">&#128203;</div>
+                <div><div class="sec-title">Document Metadata</div><div class="sec-sub">Title, authors, affiliations and keywords</div></div>
+            </div>
+            
+            <div class="card">
+                <label>Paper Title</label>
+                <input type="text" id="title" value="Deep Multimodal Fusion for Robust Temporal Sequence Modelling in Noisy Environments">
+                <label>Keywords (comma-separated)</label>
+                <input type="text" id="keywords" value="multimodal learning, temporal modelling, attention mechanisms, deep learning">
+            </div>
+
+            <div class="sec-header">
+                <div class="sec-icon sec-icon-purple">&#128101;</div>
+                <div><div class="sec-title">Authors</div><div class="sec-sub">Manage author list</div></div>
+            </div>
+            <div class="card">
+                <table id="authors-table">
+                    <thead><tr><th>Full Name</th><th>Affiliation</th><th>Email</th><th></th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="text" class="author-name" value="Alice J. Researcher"></td>
+                            <td><input type="text" class="author-affil" value="MIT CSAIL, Cambridge, MA, USA"></td>
+                            <td><input type="text" class="author-email" value="aresearcher@mit.edu"></td>
+                            <td><button type="button" class="btn-delete" onclick="this.closest('tr').remove()">X</button></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" class="author-name" value="Bob K. Scholar"></td>
+                            <td><input type="text" class="author-affil" value="Stanford NLP Group, Stanford, CA, USA"></td>
+                            <td><input type="text" class="author-email" value="bscholar@stanford.edu"></td>
+                            <td><button type="button" class="btn-delete" onclick="this.closest('tr').remove()">X</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="btn-sm" onclick="addAuthorRow()">+ Add Author</button>
+            </div>
+        </div>
+
+        <div id="tab-ctx" class="tab-content">
+            <div class="sec-header">
+                <div class="sec-icon sec-icon-green">&#128300;</div>
+                <div><div class="sec-title">Research Context</div><div class="sec-sub">Notes or bullet points &mdash; Gemini expands everything</div></div>
+            </div>
+            <div class="grid-2">
+                <div>
+                    <label>Abstract Goals & Contributions</label>
+                    <textarea id="abstract_goals" rows="6" placeholder="* Novel cross-modal attention architecture..."></textarea>
+                    <label>Methodology</label>
+                    <textarea id="methodology_notes" rows="8" placeholder="* Dual-stream encoder..."></textarea>
+                </div>
+                <div>
+                    <label>Introduction & Background</label>
+                    <textarea id="intro_bg" rows="6" placeholder="* Multimodal learning surged since..."></textarea>
+                    <label>Results & Experimental Data</label>
+                    <textarea id="results_data" rows="8" placeholder="* Ours 89.4% vs CLIP 85.2%..."></textarea>
+                </div>
+            </div>
+            <div class="card">
+                <label>Additional Notes / Special Instructions (optional)</label>
+                <textarea id="extra_notes" rows="3" placeholder="e.g. Emphasise efficiency..."></textarea>
+            </div>
+        </div>
+
+        <div id="tab-bib" class="tab-content">
+            <div class="sec-header">
+                <div class="sec-icon sec-icon-pink">&#128218;</div>
+                <div><div class="sec-title">Bibliography</div><div class="sec-sub">Paste raw BibTeX</div></div>
+            </div>
+            <div class="card">
+                <textarea id="bibtex_entries" rows="15" placeholder="@article{...}"></textarea>
+            </div>
+        </div>
+
+        <div id="tab-gen" class="tab-content">
+            <div class="sec-header">
+                <div class="sec-icon sec-icon-blue">&#128640;</div>
+                <div><div class="sec-title">Generate & Export</div><div class="sec-sub">One click &rarr; full paper &middot; LaTeX source &middot; compiled PDF</div></div>
+            </div>
+            
+            <div class="card-sm" style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:20px;">
+                <span style="font-size:0.78rem;color:#5a6380;">&#128208; <b id="lbl-layout">Single Column</b></span>
+                <span style="font-size:0.78rem;color:#5a6380;">&#128196; <b id="lbl-pages">~8 pages</b></span>
+                <span style="font-size:0.78rem;color:#5a6380;">&#127963; <b id="lbl-venue">NeurIPS</b></span>
+            </div>
+
+            <button type="button" class="btn-primary" id="btn-generate" onclick="generatePaper()">&#10024; Generate Full Paper</button>
+
+            <div id="loading-overlay">
+                <div class="loader"></div>
+                <span style="font-weight:600; color:#0d6efd;" id="loading-text">Synthesizing architecture and compiling LaTeX via Gemini... (This will take up to 60 seconds)</span>
+            </div>
+
+            <div id="results-container">
+                <hr style="border: 0; border-top: 1px solid #eaedf3; margin: 30px 0;">
+                
+                <div class="gen-status-bar">
+                    <div class="gen-status-dot"></div>
+                    <div class="gen-status-text">Paper ready</div>
+                    <div class="gen-status-meta" id="res-meta">0 words &middot; 8 sections</div>
+                </div>
+
+                <h3>📥 Downloads</h3>
+                <div class="dl-grid">
+                    <div class="dl-card">
+                        <div class="dl-card-title">📝 LaTeX Source</div>
+                        <div class="dl-card-meta">.tex file &middot; single source file</div>
+                        <button class="btn-outline" onclick="downloadTex()">📥 Download .tex Only</button>
+                    </div>
+                    <div class="dl-card">
+                        <div class="dl-card-title">📦 Overleaf Ready Bundle</div>
+                        <div class="dl-card-meta">.zip file &middot; Includes all graphs & citations</div>
+                        <button class="btn-outline" onclick="downloadZip()">📥 Download Project ZIP</button>
+                    </div>
+                    <div class="dl-card">
+                        <div class="dl-card-title">🌐 Open in Overleaf</div>
+                        <div class="dl-card-meta">Edit, compile &amp; share online</div>
+                        <a class="btn-outline overleaf-cta" href="[https://www.overleaf.com/project/new/upload](https://www.overleaf.com/project/new/upload)" target="_blank">↗ New Overleaf Project</a>
+                    </div>
+                </div>
+
+                <button class="collapsible">&#128209; Preview generated sections</button>
+                <div class="collapsible-content" id="preview-sections"></div>
+
+                <button class="collapsible">&#128295; Raw LaTeX source</button>
+                <div class="collapsible-content">
+                    <div class="code-block" id="raw-tex-output"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    // State variables
+    let generatedZipBase64 = null;
+    let generatedTex = null;
+
+    // UI Updates
+    function updateSliders() {
+        const mode = document.querySelector('input[name="length_mode"]:checked').value;
+        if(mode === "Pages") {
+            document.getElementById('pages-slider-group').style.display = 'block';
+            document.getElementById('words-slider-group').style.display = 'none';
+            document.getElementById('pages-val').innerText = 'Target pages: ' + document.getElementById('target_pages').value;
+            document.getElementById('lbl-pages').innerText = '~' + document.getElementById('target_pages').value + ' pages';
+        } else {
+            document.getElementById('pages-slider-group').style.display = 'none';
+            document.getElementById('words-slider-group').style.display = 'block';
+            document.getElementById('words-val').innerText = 'Target words: ' + document.getElementById('target_words').value;
+            document.getElementById('lbl-pages').innerText = '~' + document.getElementById('target_words').value + ' words';
+        }
+        
+        const layout = document.querySelector('input[name="layout_opt"]:checked').value;
+        document.getElementById('lbl-layout').innerText = layout;
+        document.getElementById('lbl-venue').innerText = document.getElementById('venue').value;
+    }
+
+    document.querySelectorAll('input[name="length_mode"]').forEach(r => r.addEventListener('change', updateSliders));
+    document.querySelectorAll('input[name="layout_opt"]').forEach(r => r.addEventListener('change', updateSliders));
+    document.getElementById('venue').addEventListener('change', updateSliders);
+
+    function openTab(evt, tabName) {
+        let i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) { tabcontent[i].classList.remove("active"); }
+        tablinks = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tablinks.length; i++) { tablinks[i].classList.remove("active"); }
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+
+    function addAuthorRow() {
+        const tbody = document.querySelector("#authors-table tbody");
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><input type="text" class="author-name" placeholder="Name"></td>
+            <td><input type="text" class="author-affil" placeholder="Affiliation"></td>
+            <td><input type="text" class="author-email" placeholder="Email"></td>
+            <td><button type="button" class="btn-delete" onclick="this.closest('tr').remove()">X</button></td>
+        `;
+        tbody.appendChild(tr);
+    }
+
+    // Collapsible Logic
+    document.addEventListener("click", function(e) {
+        if (e.target && e.target.classList.contains("collapsible")) {
+            e.target.classList.toggle("active-collapsible");
+            let content = e.target.nextElementSibling;
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+                setTimeout(() => content.style.padding = "0 15px", 200);
+            } else {
+                content.style.padding = "15px";
+                content.style.maxHeight = content.scrollHeight + "px";
+            }
+        }
+    });
+
+    // Generate Request
+    async function generatePaper() {
+        const btn = document.getElementById('btn-generate');
+        const loader = document.getElementById('loading-overlay');
+        const resContainer = document.getElementById('results-container');
+        
+        btn.disabled = true;
+        loader.style.display = 'block';
+        resContainer.style.display = 'none';
+        
+        try {
+            const formData = new FormData();
+            formData.append('title', document.getElementById('title').value);
+            formData.append('keywords', document.getElementById('keywords').value);
+            
+            const authors = [];
+            document.querySelectorAll('#authors-table tbody tr').forEach(tr => {
+                authors.push({
+                    "Name": tr.querySelector('.author-name').value,
+                    "Affiliation": tr.querySelector('.author-affil').value,
+                    "Email": tr.querySelector('.author-email').value
+                });
+            });
+            formData.append('authors', JSON.stringify(authors));
+            
+            formData.append('abstract_goals', document.getElementById('abstract_goals').value);
+            formData.append('methodology_notes', document.getElementById('methodology_notes').value);
+            formData.append('intro_bg', document.getElementById('intro_bg').value);
+            formData.append('results_data', document.getElementById('results_data').value);
+            formData.append('extra_notes', document.getElementById('extra_notes').value);
+            formData.append('bibtex_entries', document.getElementById('bibtex_entries').value);
+            
+            formData.append('layout_opt', document.querySelector('input[name="layout_opt"]:checked').value);
+            formData.append('length_mode', document.querySelector('input[name="length_mode"]:checked').value);
+            formData.append('target_pages', document.getElementById('target_pages').value);
+            formData.append('target_words', document.getElementById('target_words').value);
+            formData.append('venue', document.getElementById('venue').value);
+            
+            const fileInput = document.getElementById('figures');
+            if(fileInput.files.length > 0) {
+                Array.from(fileInput.files).forEach(f => formData.append('figures', f));
+            } else {
+                formData.append('figures', new Blob()); // empty blob if none
+            }
+
+            const response = await fetch('/api/generate', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            
+            if(!response.ok) {
+                throw new Error(data.error || "Generation Failed.");
+            }
+
+            // Success state handling
+            generatedZipBase64 = data.zip_base64;
+            generatedTex = data.latex_src;
+            
+            document.getElementById('res-meta').innerHTML = `${data.total_words.toLocaleString()} words &middot; 8 sections`;
+            document.getElementById('raw-tex-output').innerText = data.latex_src;
+            
+            let previewHtml = '';
+            for(const [tag, content] of Object.entries(data.sections)) {
+                let formattedTag = tag.replace(/_/g, " ").replace(/\w\S*/g, w => (w.replace(/^\w/, c => c.toUpperCase())));
+                let wc = data.word_counts[tag] || 0;
+                previewHtml += `<div style="font-size:0.85rem;font-weight:700;color:#6f42c1;margin:12px 0 4px;">${formattedTag} <span style="font-weight:400;color:#5a6380;">(${wc} words)</span></div>`;
+                previewHtml += `<div class="code-block" style="max-height:150px; margin-bottom:15px;">${content.substring(0,2000)}...</div>`;
+            }
+            document.getElementById('preview-sections').innerHTML = previewHtml;
+            
+            loader.style.display = 'none';
+            resContainer.style.display = 'block';
+
+        } catch (error) {
+            alert("Error: " + error.message);
+            loader.style.display = 'none';
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    // Download helpers
+    function downloadTex() {
+        if(!generatedTex) return;
+        const blob = new Blob([generatedTex], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'main.tex';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function downloadZip() {
+        if(!generatedZipBase64) return;
+        const binaryString = window.atob(generatedZipBase64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], { type: 'application/zip' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'sciwrite_overleaf_project.zip';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // Init
+    updateSliders();
+</script>
+</body>
+</html>
